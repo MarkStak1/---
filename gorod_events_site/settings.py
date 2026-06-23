@@ -219,6 +219,7 @@ STORAGES = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+SERVE_MEDIA = DEBUG or ON_RENDER
 
 if not DEBUG:
     CSRF_TRUSTED_ORIGINS = [
