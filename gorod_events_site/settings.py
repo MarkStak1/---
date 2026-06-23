@@ -30,8 +30,9 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-_default_debug = 'False' if os.environ.get('RENDER') else 'True'
-DEBUG = os.environ.get('DEBUG', _default_debug) == 'True'
+ON_RENDER = bool(os.environ.get('RENDER') or os.environ.get('RENDER_EXTERNAL_HOSTNAME'))
+_default_debug = 'False' if ON_RENDER else 'True'
+DEBUG = os.environ.get('DEBUG', _default_debug).lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -92,16 +93,17 @@ WSGI_APPLICATION = 'gorod_events_site.wsgi.application'
 RENDER_POSTGRES_EXTERNAL = re.compile(
     r'(@dpg-[a-z0-9-]+-a)\.[a-z0-9-]+-postgres\.render\.com',
 )
+RENDER_POSTGRES_HOST = re.compile(
+    r'^(dpg-[a-z0-9-]+-a)\.[a-z0-9-]+-postgres\.render\.com$',
+)
 
 
 def _prepare_database_url(url):
     """Render Web Service должен ходить в Postgres по internal URL без SSL."""
-    on_render = bool(os.environ.get('RENDER'))
-
-    if on_render:
+    if ON_RENDER:
         url = RENDER_POSTGRES_EXTERNAL.sub(r'\1', url)
 
-    if on_render and '@dpg-' in url and 'postgres.render.com' not in url:
+    if ON_RENDER and '@dpg-' in url and 'postgres.render.com' not in url:
         ssl_mode = 'disable'
     else:
         ssl_mode = 'require'
@@ -114,6 +116,24 @@ def _prepare_database_url(url):
     return url, ssl_mode
 
 
+def _fix_render_postgres(config):
+    """Подстраховка: правим HOST/SSL даже если DATABASE_URL пришёл в external-формате."""
+    if config.get('ENGINE') != 'django.db.backends.postgresql':
+        return config
+
+    host = config.get('HOST', '')
+    host_match = RENDER_POSTGRES_HOST.match(host)
+    if host_match and ON_RENDER:
+        config['HOST'] = host_match.group(1)
+        config.setdefault('OPTIONS', {})
+        config['OPTIONS']['sslmode'] = 'disable'
+    elif ON_RENDER and host.startswith('dpg-') and 'postgres.render.com' not in host:
+        config.setdefault('OPTIONS', {})
+        config['OPTIONS']['sslmode'] = 'disable'
+
+    return config
+
+
 if os.environ.get('DATABASE_URL'):
     database_url, ssl_mode = _prepare_database_url(os.environ['DATABASE_URL'])
     DATABASES = {
@@ -123,10 +143,14 @@ if os.environ.get('DATABASE_URL'):
             conn_health_checks=True,
         )
     }
+    DATABASES['default'] = _fix_render_postgres(DATABASES['default'])
     if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
         DATABASES['default'].setdefault('OPTIONS', {})
-        DATABASES['default']['OPTIONS']['sslmode'] = ssl_mode
-elif os.environ.get('RENDER'):
+        if ON_RENDER and DATABASES['default']['HOST'].startswith('dpg-'):
+            DATABASES['default']['OPTIONS']['sslmode'] = 'disable'
+        else:
+            DATABASES['default']['OPTIONS']['sslmode'] = ssl_mode
+elif ON_RENDER:
     # На Render нет локального PostgreSQL — SQLite, если DATABASE_URL не задан
     DATABASES = {
         'default': {
