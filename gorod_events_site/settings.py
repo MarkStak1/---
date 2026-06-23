@@ -88,12 +88,25 @@ WSGI_APPLICATION = 'gorod_events_site.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 if os.environ.get('DATABASE_URL'):
+    database_url = os.environ['DATABASE_URL']
+    if 'sslmode=' not in database_url:
+        database_url += ('&' if '?' in database_url else '?') + 'sslmode=require'
     DATABASES = {
         'default': dj_database_url.config(
-            default=os.environ['DATABASE_URL'],
+            default=database_url,
             conn_max_age=600,
-            ssl_require=True,
         )
+    }
+    if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
+        DATABASES['default'].setdefault('OPTIONS', {})
+        DATABASES['default']['OPTIONS']['sslmode'] = 'require'
+elif os.environ.get('RENDER'):
+    # На Render нет локального PostgreSQL — SQLite, если DATABASE_URL не задан
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
 else:
     DATABASES = {

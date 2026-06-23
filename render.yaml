@@ -9,5 +9,5 @@ services:
         generateValue: true
       - key: DEBUG
         value: "False"
-      - key: DATABASE_URL
-        sync: false
+      # DATABASE_URL необязателен: без него используется SQLite на Render.
+      # Для PostgreSQL (Neon/Supabase) добавьте переменную DATABASE_URL в Dashboard.
