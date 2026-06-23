@@ -1,0 +1,54 @@
+{% extends 'event/base.html' %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<section class="profile-header">
+    <div class="profile-avatar" aria-hidden="true">{{ user.username|first|upper }}</div>
+    <div>
+        <h1 class="page-title">{{ user.username }}</h1>
+        <p class="page-subtitle">{{ user.email|default:"Email не указан" }}</p>
+    </div>
+</section>
+
+<section class="profile-section">
+    <h2 class="profile-section__title">Мои записи на события</h2>
+
+    {% if registrations %}
+    <ul class="events-grid">
+        {% for reg in registrations %}
+        <li class="event-card">
+            <a href="{% url 'event_detail' reg.event.id %}" class="event-card__link">
+                <div class="event-card__media">
+                    {% include 'event/_event_preview.html' with event=reg.event modifier='card' %}
+                    <span class="event-card__category">{{ reg.event.category.name }}</span>
+                </div>
+                <div class="event-card__body">
+                <h3 class="event-card__title">{{ reg.event.title }}</h3>
+                <div class="event-card__meta">
+                    <span>📅 {{ reg.event.date|date:"d.m.Y H:i" }}</span>
+                    <span>📍 {{ reg.event.location }}</span>
+                </div>
+                <p class="event-card__registered">
+                    Записаны {{ reg.registered_at|date:"d.m.Y H:i" }}
+                </p>
+                <p class="event-card__price{% if reg.event.price == 0 %} event-card__price--free{% endif %}">
+                    {% if reg.event.price == 0 %}
+                        Бесплатно
+                    {% else %}
+                        Оплачено {{ reg.amount_paid }} ₽
+                    {% endif %}
+                </p>
+                </div>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state__icon" aria-hidden="true">🎟️</div>
+        <h2 class="page-title">Вы ещё ни на что не записались</h2>
+        <p class="page-subtitle">Выберите мероприятие в афише и нажмите «Записаться»</p>
+        <a href="{% url 'event_list' %}" class="btn btn--primary" style="margin-top: 1.5rem;">Перейти к афише</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

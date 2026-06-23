@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Городские события{% endblock %} — ООО «Городские события»</title>
+    <link rel="stylesheet" href="{% static 'event/css/main.css' %}?v=5">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="{% url 'event_list' %}" class="logo">
+                <span class="logo-icon" aria-hidden="true">🎭</span>
+                <span>
+                    <span class="logo-text">Городские события</span>
+                    <span class="logo-sub">ООО «Городские события»</span>
+                </span>
+            </a>
+            <nav class="nav-main" aria-label="Основная навигация">
+                <a href="{% url 'event_list' %}" class="nav-link {% if request.resolver_match.url_name == 'event_list' %}nav-link--active{% endif %}">Афиша</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}nav-link--active{% endif %}">Профиль</a>
+                    <span class="nav-link nav-link--user">{{ user.username }}</span>
+                    <a href="{% url 'logout' %}" class="nav-link">Выйти</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">Войти</a>
+                    <a href="{% url 'signup' %}" class="nav-link nav-link--cta">Регистрация</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        {% if messages %}
+            <ul class="messages" aria-live="polite">
+                {% for message in messages %}
+                    <li class="message message--{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="logo-text">ООО «Городские события»</span>
+                <p>Афиша концертов, выставок, фестивалей и других мероприятий в вашем городе.</p>
+            </div>
+            <div>
+                <h3 class="footer-heading">Навигация</h3>
+                <ul class="footer-links">
+                    <li><a href="{% url 'event_list' %}">Все события</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'profile' %}">Мой профиль</a></li>
+                    {% endif %}
+                    <li><a href="/admin/">Админ-панель</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="footer-heading">Контакты</h3>
+                <ul class="footer-contact">
+                    <li>📧 info@gorod-events.ru</li>
+                    <li>📞 +7 (495) 123-45-67</li>
+                    <li>📍 г. Москва, ул. Культурная, 1</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © {% now "Y" %} ООО «Городские события». Все права защищены.
+        </div>
+    </footer>
+</body>
+</html>

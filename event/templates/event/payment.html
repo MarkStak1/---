@@ -1,0 +1,62 @@
+{% extends 'event/base.html' %}
+{% block title %}Оплата — {{ event.title }}{% endblock %}
+{% block content %}
+<section class="payment-page">
+    <a href="{% url 'event_detail' event.id %}" class="event-detail__back">← Назад к событию</a>
+
+    <div class="payment-layout">
+        <div class="payment-summary">
+            <h1 class="page-title">Оплата участия</h1>
+            <p class="page-subtitle">{{ event.title }}</p>
+            <div class="payment-summary__details">
+                <div class="payment-summary__row">
+                    <span>Дата</span>
+                    <span>{{ event.date|date:"d.m.Y H:i" }}</span>
+                </div>
+                <div class="payment-summary__row">
+                    <span>Место</span>
+                    <span>{{ event.location }}</span>
+                </div>
+                <div class="payment-summary__row payment-summary__row--total">
+                    <span>К оплате</span>
+                    <span>{{ event.price }} ₽</span>
+                </div>
+            </div>
+            <p class="payment-demo-note">Демонстрационный режим оплаты для учебного проекта. Реальные средства не списываются.</p>
+        </div>
+
+        <div class="auth-card payment-card">
+            <div class="payment-card-visual" aria-hidden="true">
+                <div class="payment-card-visual__chip"></div>
+                <div class="payment-card-visual__number">•••• •••• •••• ••••</div>
+                <div class="payment-card-visual__footer">
+                    <span>CARD HOLDER</span>
+                    <span>MM/YY</span>
+                </div>
+            </div>
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <ul class="form-errors">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn--primary auth-form__submit">
+                    Оплатить {{ event.price }} ₽
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

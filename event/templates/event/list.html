@@ -1,0 +1,154 @@
+{% extends 'event/base.html' %}
+{% block title %}Афиша{% if active_category %} — {{ active_category.name }}{% endif %}{% endblock %}
+{% block content %}
+{% if not active_category %}
+<section class="hero-banner" aria-label="О проекте">
+    <div class="hero-banner__bg" aria-hidden="true">
+        <span class="hero-banner__orb hero-banner__orb--1"></span>
+        <span class="hero-banner__orb hero-banner__orb--2"></span>
+        <span class="hero-banner__orb hero-banner__orb--3"></span>
+        <span class="hero-banner__grid"></span>
+    </div>
+
+    <div class="hero-banner__content">
+        <p class="hero-banner__badge">ООО «Городские события»</p>
+        <h1 class="hero-banner__title">
+            Афиша городских <span class="hero-banner__title-accent">событий</span>
+        </h1>
+        <p class="hero-banner__text">
+            Единая площадка для поиска концертов, выставок, спектаклей и фестивалей в вашем городе.
+            Просматривайте афишу, выбирайте мероприятия и записывайтесь онлайн — бесплатно или с оплатой билета.
+        </p>
+
+        <ul class="hero-banner__stats">
+            <li class="hero-banner__stat">
+                <span class="hero-banner__stat-value">{{ events_count }}</span>
+                <span class="hero-banner__stat-label">событий в афише</span>
+            </li>
+            <li class="hero-banner__stat">
+                <span class="hero-banner__stat-value">{{ categories_count }}</span>
+                <span class="hero-banner__stat-label">типов мероприятий</span>
+            </li>
+            <li class="hero-banner__stat">
+                <span class="hero-banner__stat-value">24/7</span>
+                <span class="hero-banner__stat-label">онлайн-запись</span>
+            </li>
+        </ul>
+
+        <div class="hero-banner__actions">
+            <a href="#afisha" class="btn btn--primary">Смотреть афишу</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="btn btn--outline">Мои записи</a>
+            {% else %}
+                <a href="{% url 'signup' %}" class="btn btn--outline">Создать аккаунт</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="hero-banner__visual" aria-hidden="true">
+        <div class="hero-banner__card hero-banner__card--1">🎵</div>
+        <div class="hero-banner__card hero-banner__card--2">🎭</div>
+        <div class="hero-banner__card hero-banner__card--3">🎪</div>
+    </div>
+</section>
+{% else %}
+<section class="page-hero">
+    <h1 class="page-title">{{ active_category.name }}</h1>
+    <p class="page-subtitle">Мероприятия типа «{{ active_category.name }}»</p>
+</section>
+{% endif %}
+
+<div class="afisha-layout" id="afisha">
+    <aside class="filters-panel" aria-label="Фильтр по типам событий">
+        <div class="filters-panel__glow" aria-hidden="true"></div>
+
+        <div class="filters-panel__header">
+            <div class="filters-panel__icon" aria-hidden="true">🎯</div>
+            <div>
+                <h2 class="filters-panel__title">Типы событий</h2>
+                <p class="filters-panel__subtitle">Фильтр афиши</p>
+            </div>
+        </div>
+
+        <nav class="filters-panel__nav">
+            <a href="{% url 'event_list' %}"
+               class="filter-chip{% if not active_category %} filter-chip--active{% endif %}">
+                <span class="filter-chip__icon" aria-hidden="true">✨</span>
+                <span class="filter-chip__body">
+                    <span class="filter-chip__label">Все события</span>
+                    <span class="filter-chip__hint">Показать всё</span>
+                </span>
+            </a>
+
+            <div class="filters-panel__divider" aria-hidden="true"></div>
+
+            <ul class="filters-panel__list">
+                {% for category in categories %}
+                <li>
+                    <a href="{% url 'event_list_by_type' category.slug %}"
+                       class="filter-chip{% if active_category and active_category.id == category.id %} filter-chip--active{% endif %}">
+                        <span class="filter-chip__icon" aria-hidden="true">
+                            {% if category.slug == 'concert' %}🎵
+                            {% elif category.slug == 'exhibition' %}🖼️
+                            {% elif category.slug == 'festival' %}🎪
+                            {% elif category.slug == 'theater' %}🎭
+                            {% elif category.slug == 'masterclass' %}🎨
+                            {% else %}📌{% endif %}
+                        </span>
+                        <span class="filter-chip__body">
+                            <span class="filter-chip__label">{{ category.name }}</span>
+                            <span class="filter-chip__hint">{{ category.event_count }} меропр.</span>
+                        </span>
+                        <span class="filter-chip__badge">{{ category.event_count }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+
+        <p class="filters-panel__footer">Выберите тип, чтобы отфильтровать афишу</p>
+    </aside>
+
+    <div class="afisha-content">
+        {% if events %}
+        <ul class="events-grid">
+            {% for event in events %}
+            <li class="event-card">
+                <a href="{% url 'event_detail' event.id %}" class="event-card__link">
+                    <div class="event-card__media">
+                        {% include 'event/_event_preview.html' with event=event modifier='card' %}
+                        <span class="event-card__category">{{ event.category.name }}</span>
+                    </div>
+                    <div class="event-card__body">
+                    <h2 class="event-card__title">{{ event.title }}</h2>
+                    <div class="event-card__meta">
+                        <span>📅 {{ event.date|date:"d.m.Y H:i" }}</span>
+                        <span>📍 {{ event.location }}</span>
+                    </div>
+                    <p class="event-card__price{% if event.price == 0 %} event-card__price--free{% endif %}">
+                        {% if event.price == 0 %}Бесплатно{% else %}{{ event.price }} ₽{% endif %}
+                    </p>
+                    </div>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state__icon" aria-hidden="true">📭</div>
+            <h2 class="page-title">Событий не найдено</h2>
+            <p class="page-subtitle">
+                {% if active_category %}
+                    В типе «{{ active_category.name }}» пока нет мероприятий
+                {% else %}
+                    Загляните позже — скоро появятся новые мероприятия
+                {% endif %}
+            </p>
+            {% if active_category %}
+                <a href="{% url 'event_list' %}" class="btn btn--primary" style="margin-top: 1.5rem;">Показать все</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

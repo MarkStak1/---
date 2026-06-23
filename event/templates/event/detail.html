@@ -1,0 +1,49 @@
+{% extends 'event/base.html' %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block content %}
+<article class="event-detail">
+    <a href="{% url 'event_list' %}" class="event-detail__back">← Назад к афише</a>
+
+    {% include 'event/_event_preview.html' with event=event modifier='detail' %}
+
+    <header class="event-detail__header">
+        <span class="event-detail__category">{{ event.category.name }}</span>
+        <h1 class="event-detail__title">{{ event.title }}</h1>
+    </header>
+
+    <p class="event-detail__description">{{ event.description }}</p>
+
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-card__label">Дата и время</div>
+            <div class="info-card__value">{{ event.date|date:"d.m.Y H:i" }}</div>
+        </div>
+        <div class="info-card">
+            <div class="info-card__label">Место</div>
+            <div class="info-card__value">{{ event.location }}</div>
+        </div>
+        <div class="info-card">
+            <div class="info-card__label">Стоимость</div>
+            <div class="info-card__value">
+                {% if event.price == 0 %}Бесплатно{% else %}{{ event.price }} ₽{% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+        {% if is_registered %}
+            <p class="registered-badge">✓ Вы записаны на это событие{% if event.price > 0 %} — оплачено{% endif %}</p>
+            <a href="{% url 'profile' %}" class="btn btn--outline" style="margin-top: 1rem;">Мои записи</a>
+        {% else %}
+            {% if event.price > 0 %}
+                <a href="{% url 'event_payment' event.id %}" class="btn btn--primary">Оплатить и записаться — {{ event.price }} ₽</a>
+            {% else %}
+                <a href="{% url 'register_event' event.id %}" class="btn btn--primary">Записаться на событие</a>
+            {% endif %}
+        {% endif %}
+    {% else %}
+        <a href="{% url 'login' %}?next={% url 'event_detail' event.id %}" class="btn btn--primary">Войти, чтобы записаться</a>
+        <p class="page-subtitle auth-hint">Нет аккаунта? <a href="{% url 'signup' %}">Зарегистрируйтесь</a></p>
+    {% endif %}
+</article>
+{% endblock %}

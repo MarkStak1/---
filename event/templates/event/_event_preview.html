@@ -1,0 +1,11 @@
+{% load static %}
+<div class="event-preview{% if modifier %} event-preview--{{ modifier }}{% endif %}">
+    {% if event.preview %}
+        <img src="{{ event.preview.url }}" alt="{{ event.title }}" class="event-preview__image" loading="lazy">
+    {% else %}
+        <img src="{% static 'event/img/previews/' %}{{ event.preview_fallback_slug }}.jpg"
+             alt="{{ event.title }}"
+             class="event-preview__image"
+             loading="lazy">
+    {% endif %}
+</div>
