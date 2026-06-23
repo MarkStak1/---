@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: gorod-events
+    runtime: python
+    buildCommand: ./build.sh
+    startCommand: gunicorn gorod_events_site.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        sync: false
