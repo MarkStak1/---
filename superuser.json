@@ -1,0 +1,110 @@
+[
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$EB79x2Xn3ZSS6KvSc0QthM$bX7h/rIwaox/4CVjqaUMo6oqJ5N8UsfV7LOQJgF/qc4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-04T13:23:39.186Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$4hbbAA3PBjdllGTDMkCC9r$nfCGTGNdVBJ4HzQz0cBvyGRWSwasWhJCmAnQYJrTd6M=",
+    "last_login": "2026-06-09T22:11:10.688Z",
+    "is_superuser": true,
+    "username": "Admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "Markzhelezka@icloud.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-06-04T13:28:57.071Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$P89UI5Noz28nXLnlliXi3p$WEc0sVZYUCkpcGWd6WAb4kJBkqBxXWJq7zfzV5yTTjI=",
+    "last_login": "2026-06-23T15:44:55.366Z",
+    "is_superuser": false,
+    "username": "Mark_Stak",
+    "first_name": "",
+    "last_name": "",
+    "email": "Markzhelezka@yandex.ru",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-04T13:39:10.561Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$m8iSEvbHHy7V9s82qYic7K$/HASRvg08S13xVkdWvaitW6AFIGRx5IKIZliFZBrGBk=",
+    "last_login": "2026-06-09T22:17:01.545Z",
+    "is_superuser": false,
+    "username": "Mark_Stak1",
+    "first_name": "",
+    "last_name": "",
+    "email": "Markzhelezka@icloud.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-09T20:15:03.411Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$6bItRVY711HMTXoQY1FNZt$mxTkt7tZc11+MfBhejc/dIKB8NXw+PNOHQ5i/S8Yo9Y=",
+    "last_login": "2026-06-23T15:43:52.348Z",
+    "is_superuser": true,
+    "username": "Adminn",
+    "first_name": "",
+    "last_name": "",
+    "email": "mark@mail.ru",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-06-23T15:43:31.998Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 6,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$H4fKCAJ33EMuxHSzXbJdu3$CbBcqOzvF3PjipqGBYzgeIKlTQdYenmXdByEaRyg4JM=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "Adminnn",
+    "first_name": "",
+    "last_name": "",
+    "email": "Markzhelezka@yandex.ru",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-06-23T19:07:15.090Z",
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]
