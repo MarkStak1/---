@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import re
 from pathlib import Path
 
 import dj_database_url
@@ -29,7 +30,8 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+_default_debug = 'False' if os.environ.get('RENDER') else 'True'
+DEBUG = os.environ.get('DEBUG', _default_debug) == 'True'
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -87,19 +89,43 @@ WSGI_APPLICATION = 'gorod_events_site.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+RENDER_POSTGRES_EXTERNAL = re.compile(
+    r'(@dpg-[a-z0-9-]+-a)\.[a-z0-9-]+-postgres\.render\.com',
+)
+
+
+def _prepare_database_url(url):
+    """Render Web Service должен ходить в Postgres по internal URL без SSL."""
+    on_render = bool(os.environ.get('RENDER'))
+
+    if on_render:
+        url = RENDER_POSTGRES_EXTERNAL.sub(r'\1', url)
+
+    if on_render and '@dpg-' in url and 'postgres.render.com' not in url:
+        ssl_mode = 'disable'
+    else:
+        ssl_mode = 'require'
+
+    url = re.sub(r'([?&])sslmode=[^&]*(&)?', lambda m: m.group(2) or '', url)
+    url = url.rstrip('?&')
+    separator = '&' if '?' in url else '?'
+    url = f'{url}{separator}sslmode={ssl_mode}'
+
+    return url, ssl_mode
+
+
 if os.environ.get('DATABASE_URL'):
-    database_url = os.environ['DATABASE_URL']
-    if 'sslmode=' not in database_url:
-        database_url += ('&' if '?' in database_url else '?') + 'sslmode=require'
+    database_url, ssl_mode = _prepare_database_url(os.environ['DATABASE_URL'])
     DATABASES = {
         'default': dj_database_url.config(
             default=database_url,
             conn_max_age=600,
+            conn_health_checks=True,
         )
     }
     if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
         DATABASES['default'].setdefault('OPTIONS', {})
-        DATABASES['default']['OPTIONS']['sslmode'] = 'require'
+        DATABASES['default']['OPTIONS']['sslmode'] = ssl_mode
 elif os.environ.get('RENDER'):
     # На Render нет локального PostgreSQL — SQLite, если DATABASE_URL не задан
     DATABASES = {
